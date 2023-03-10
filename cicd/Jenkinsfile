@@ -1,4 +1,5 @@
 def Exporter1_IP
+//跨步骤
 def Exporter2_IP
 pipeline {
     agent any
@@ -14,9 +15,9 @@ pipeline {
         ansiColor('xterm')
     }
     environment {
-        AWS_CRED        = 'aws_jr9' //Change to yours
-        OwnerEmail      = 'william@gmail.com' //Change to yours
-        S3BucketName    = 'william-jr9' //Change to yours, used to save cfn yml files larger than 50KB
+        AWS_CRED        = 'AWS-IAMLEO' //Change to yours
+        OwnerEmail      = 'fisherinaus@gmail.com' //Change to yours
+        S3BucketName    = 'cacareerai-client-env' //Change to yours, used to save cfn yml files larger than 50KB
         SecurityGroupID = 'sg-da83229f' //Change to your default VPC's default security group ID
         JenkinsServer   = 'jenkins.az.willido.net'   //Change to your JenkinsServer URL
         AWS_REGION      = 'ap-southeast-2'
@@ -39,6 +40,7 @@ pipeline {
                 withAWS(credentials: AWS_CRED, region: 'ap-southeast-2') {
                     // some block
                     dir('cfn') {
+                        //第一步，创建s3，第二步创建到cloudformation 如果模板文件比较大，放到S3里面去。
                         sh '''
                             aws s3 mb s3://$S3BucketName --region $AWS_REGION
                             aws s3 cp $VPCTemplate s3://$S3BucketName
@@ -54,6 +56,7 @@ pipeline {
             }
         }
         stage('CFN Create Instance') {
+            //必须等第一个 创建完成才能创建第二个
             when {expression{return params.blCreateInstances}}
             steps {
                 withAWS(credentials: AWS_CRED, region: 'ap-southeast-2') {
@@ -64,6 +67,8 @@ pipeline {
                         }
                     }
                     dir('cfn') {
+                        // 创建sns。手动创建，要create subscription。lambda 很强大或者email ，需要登陆自己的邮箱确认sns
+                        //  如果相触发autoscaling ，可以使用alarm来实现。
                         sh '''
                             aws cloudformation create-stack --stack-name $EC2StackName \
                             --template-body file://$EC2Template \
@@ -121,6 +126,8 @@ pipeline {
             steps {
                 withAWS(credentials: AWS_CRED, region: 'ap-southeast-2') {
                     // jq must be installed
+                    //只指定创建3个，instance ，采集的时候需要3个的ip地址，所以需要预处理
+                    //从上面度IP地址
                     dir('terraform') {
                         script{
                             Exporter1_IP = sh(returnStdout: true, script: "terraform output -json ec2_public_ips | jq -r '.[1]'").trim()

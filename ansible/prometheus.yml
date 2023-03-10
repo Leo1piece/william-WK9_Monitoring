@@ -14,19 +14,19 @@ scrape_configs:
     static_configs:
       - targets:
         - nodeexporter:9100
-
+# 本身监控的是自己所以 nodeexporter statsdexport
   - job_name: 'Exporter-1'
     scrape_interval: 5s
     static_configs:
       - targets:
         - Exporter1_IP:9100
-
+，
   - job_name: 'Exporter-2'
     scrape_interval: 5s
     static_configs:
       - targets:
         - Exporter2_IP:9100
-
+#安装cadivors插件 在playbook中，暴露8080端口。
   - job_name: 'Containers'
     scrape_interval: 10s
     static_configs:

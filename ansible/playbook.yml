@@ -11,7 +11,7 @@
           - stress
         state: present # declerative
         update_cache: yes
-
+# 通过拷贝不同的两个文件。main .yml 拷贝生成多个文件。 远端在三台机枪分别安装，把配置文件放到指定位置。
 - hosts: Monitor_main
   become: yes
   become_user: root

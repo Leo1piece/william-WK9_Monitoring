@@ -14,6 +14,7 @@ provider "aws" {
 }
 
 resource "aws_security_group_rule" "monitor_ports" {
+  //从jenkins 文件中取变量。 sg rule
   for_each          = toset(var.sec_ports)
   type              = "ingress"
   from_port         = each.key
@@ -25,6 +26,7 @@ resource "aws_security_group_rule" "monitor_ports" {
 
 
 resource "aws_key_pair" "deployer" {
+  //jenkins 的目录不是home jenkins 
   key_name   = "ansible-deployer-key"
   public_key = file("/var/lib/jenkins/.ssh/id_rsa.pub")
 }
@@ -49,6 +51,7 @@ data "aws_ami" "image-ubuntu" {
 }
 
 resource "aws_instance" "monitor" {
+  //count 是3个
   count         = var.ec2_count
 
   ami           = data.aws_ami.image-ubuntu.id

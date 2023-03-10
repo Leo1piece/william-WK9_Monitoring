@@ -5,6 +5,7 @@ networks:
     driver: bridge
 
 services:
+# 把EC2的信息给传送prometh
   nodeexporter:
     image: prom/node-exporter:latest
     container_name: nodeexporter
@@ -28,6 +29,7 @@ services:
       org.label-schema.group: "monitoring"
 
   cadvisor:
+  # 把container的信息给传送prometh
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     volumes:
